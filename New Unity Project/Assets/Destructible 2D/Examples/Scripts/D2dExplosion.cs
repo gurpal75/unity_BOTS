@@ -138,12 +138,12 @@ namespace Destructible2D
 							var strength    = 1.0f - hit.fraction; // Do less damage if the hit point is far from the explosion
 							var rigidbody2D = collider.attachedRigidbody;
 							
-							if (rigidbody2D != null)
+							/*if (rigidbody2D != null)
 							{
 								var force = direction * ForcePerRay * strength;
 								
 								rigidbody2D.AddForceAtPosition(force, hit.point);
-							}
+							}*/
 						}
 					}
 				}

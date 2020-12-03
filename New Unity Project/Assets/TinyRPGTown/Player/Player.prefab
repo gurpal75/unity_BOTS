@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4877723615036961267}
   - component: {fileID: 8876236762332272954}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Music
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -143,7 +143,7 @@ GameObject:
   - component: {fileID: 2836362532131447325}
   - component: {fileID: 2836362532131447326}
   - component: {fileID: 1391775184140962675}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -292,10 +292,12 @@ MonoBehaviour:
   slashAngleOffset: -45
   attackRate: 0.5
   attackRange: 1
+  attackOffsetY: 0.4
   attackLayer:
     serializedVersion: 2
-    m_Bits: 512
+    m_Bits: 823
   playerDmg: 1
+  redExplosion: {fileID: 100000, guid: 092aeef3857c50f41ada30e877c781cd, type: 3}
   footsteps:
   - {fileID: 8300000, guid: 3d38577339186ec4095055b7ecf21b97, type: 3}
   - {fileID: 8300000, guid: d1eb874dbee56714a919ef1f84b8e44b, type: 3}
@@ -346,7 +348,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3330071800016393480}
   - component: {fileID: 6899847622165140833}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Sound
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -521,7 +523,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5448408007752822421}
   - component: {fileID: 889711355307360108}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Slash
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Destructible2D;
 
 public class Entity : MonoBehaviour
 {
@@ -13,6 +14,6 @@ public class Entity : MonoBehaviour
 
     public void TakeDamage(float dmg, Vector2 knockback)
     {
-        rb.AddForce(knockback * dmg, ForceMode2D.Impulse);
+        if (rb != null) rb.AddForce(knockback * dmg, ForceMode2D.Impulse);
     }
 }

@@ -13,9 +13,12 @@ public class PlayerMovement : MonoBehaviour
     public float slashAngleOffset = 0f;
     public float attackRate = 0.1f;
     public float attackRange = 2f;
+    public float attackOffsetY = 0f;
     public LayerMask attackLayer;
 
     public float playerDmg = 1f;
+
+    public GameObject redExplosion;
 
     [Header("Sounds")]
 
@@ -162,7 +165,7 @@ public class PlayerMovement : MonoBehaviour
         slashFX.transform.eulerAngles = new Vector3(0, 0, angle + slashAngleOffset);
 
         // Get all the entities around me
-        var collisions = Physics2D.OverlapCircleAll(transform.position, attackRange, attackLayer);
+        var collisions = Physics2D.OverlapCircleAll(transform.position + Vector3.up * attackOffsetY, attackRange, attackLayer);
 
         // Keep track if we hit something
         bool hitSomething = false;
@@ -170,11 +173,21 @@ public class PlayerMovement : MonoBehaviour
         for (int i = 0; i < collisions.Length; ++i)
         {
             var entity = collisions[i].GetComponent<Entity>();
+
+            if (entity == null)
+            {
+                entity = collisions[i].GetComponentInParent<Entity>();
+                if (entity == null) continue;
+            }
+
             Vector2 direction = (entity.transform.position - transform.position).normalized;
 
             // Make sure we are facing it before we attack it
-            if (Vector2.Dot(direction, attackDir.normalized) > -0.3f)
+            // if (Vector2.Dot(direction, attackDir.normalized) > -0.3f)
             {
+                var collisionPoint = collisions[i].bounds.ClosestPoint(transform.position);
+                Instantiate(redExplosion, collisionPoint, Quaternion.identity);
+
                 entity.TakeDamage(playerDmg, direction * 50f);
                 hitSomething = true;
             }
@@ -241,6 +254,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        Gizmos.DrawWireSphere(transform.position, attackRange);
+        Gizmos.DrawWireSphere(transform.position + Vector3.up * attackOffsetY, attackRange);
     }
 }
