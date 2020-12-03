@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Cinemachine;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -27,12 +28,25 @@ public class PlayerMovement : MonoBehaviour
     public Animator animator;
     public AudioSource audioSource;
     public SpriteRenderer slashFX;
+    public CinemachineVirtualCamera cmr;
 
     Vector2 delta;
     Vector2 lastDirection;
     Vector2 attackDir;
     float footstep_timer = 0f;
     float attack_timer = 0f;
+    float shakeTimer = 0f;
+
+    CinemachineBasicMultiChannelPerlin noise;
+
+    private void Awake()
+    {
+        if (cmr != null)
+        {
+            noise = cmr.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
+            noise.m_AmplitudeGain = 0f;
+        }
+    }
 
     void Update()
     {
@@ -48,6 +62,24 @@ public class PlayerMovement : MonoBehaviour
             attack_timer = Time.time;
             attackDir = lastDirection;
         }
+
+        if (noise != null)
+        {
+            if (shakeTimer > 0)
+            {
+                noise.m_AmplitudeGain = Mathf.Lerp(noise.m_AmplitudeGain, 2f, Time.deltaTime * 10f);
+                shakeTimer -= Time.deltaTime;
+            }
+            else
+            {
+                noise.m_AmplitudeGain = Mathf.Lerp(noise.m_AmplitudeGain, 0f, Time.deltaTime * 10f);
+            }
+        }
+    }
+
+    void ShakeCamera(float time)
+    {
+        shakeTimer = time;
     }
 
     // This method is called by the animation
@@ -83,6 +115,11 @@ public class PlayerMovement : MonoBehaviour
             slash_hit[Random.Range(0, slash_hit.Length)] :
             slash[Random.Range(0, slash.Length)];
         audioSource.Play();
+
+        if (hitSomething)
+        {
+            ShakeCamera(0.1f);
+        }
     }
 
 
