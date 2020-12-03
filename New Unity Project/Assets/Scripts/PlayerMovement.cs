@@ -10,6 +10,10 @@ public class PlayerMovement : MonoBehaviour
     public float footstepsSoundRate = 0.2f;
     public float slashAngleOffset = 0f;
     public float attackRate = 0.1f;
+    public float attackRange = 2f;
+    public LayerMask attackLayer;
+
+    public float playerDmg = 1f;
 
     [Header("Sounds")]
 
@@ -26,6 +30,7 @@ public class PlayerMovement : MonoBehaviour
 
     Vector2 delta;
     Vector2 lastDirection;
+    Vector2 attackDir;
     float footstep_timer = 0f;
     float attack_timer = 0f;
 
@@ -39,23 +44,45 @@ public class PlayerMovement : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0) && Time.time - attack_timer > attackRate)
         {
-            Attack();
+            animator.SetTrigger("Attack");
+            attack_timer = Time.time;
+            attackDir = lastDirection;
         }
     }
 
+    // This method is called by the animation
     void Attack()
     {
-        attack_timer = Time.time;
+        // Make the slash face the player direction
+        var angle = Vector2.SignedAngle(Vector2.up, attackDir.normalized);
+        slashFX.transform.eulerAngles = new Vector3(0, 0, angle + slashAngleOffset);
+
+        // Get all the entities around me
+        var collisions = Physics2D.OverlapCircleAll(transform.position, attackRange, attackLayer);
+
+        // Keep track if we hit something
+        bool hitSomething = false;
+
+        for (int i = 0; i < collisions.Length; ++i)
+        {
+            var entity = collisions[i].GetComponent<Entity>();
+            Vector2 direction = (entity.transform.position - transform.position).normalized;
+
+            // Make sure we are facing it before we attack it
+            if (Vector2.Dot(direction, attackDir.normalized) > 0.5f)
+            {
+                entity.TakeDamage(playerDmg, direction * 50f);
+                hitSomething = true;
+            }
+        }
+
+        // Play the slash sound
 
         audioSource.pitch = Random.Range(0.9f, 1.1f);
-        audioSource.clip = slash_hit[Random.Range(0, slash_hit.Length)];
+        audioSource.clip = hitSomething ? 
+            slash_hit[Random.Range(0, slash_hit.Length)] :
+            slash[Random.Range(0, slash.Length)];
         audioSource.Play();
-
-        animator.SetTrigger("Attack");
-
-        var angle = Vector2.SignedAngle(Vector2.up, lastDirection.normalized);
-
-        slashFX.transform.eulerAngles = new Vector3(0, 0, angle + slashAngleOffset);
     }
 
 
@@ -79,5 +106,10 @@ public class PlayerMovement : MonoBehaviour
                 footstep_timer = 0f;
             }
         }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 }

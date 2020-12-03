@@ -138,7 +138,7 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 1
   m_Mass: 0.03141593
-  m_LinearDrag: 0
+  m_LinearDrag: 10
   m_AngularDrag: 0.05
   m_GravityScale: 0
   m_Material: {fileID: 0}
@@ -162,14 +162,19 @@ MonoBehaviour:
   footstepsSoundRate: 0.35
   slashAngleOffset: -45
   attackRate: 0.5
+  attackRange: 1
+  attackLayer:
+    serializedVersion: 2
+    m_Bits: 512
+  playerDmg: 1
   footsteps:
   - {fileID: 8300000, guid: 3d38577339186ec4095055b7ecf21b97, type: 3}
   - {fileID: 8300000, guid: d1eb874dbee56714a919ef1f84b8e44b, type: 3}
   slash:
-  - {fileID: 8300000, guid: 13a9d8e1172fd1a44b84261224a0bee5, type: 3}
+  - {fileID: 8300000, guid: 3724c8caa033a3a4c9515c09a349197d, type: 3}
   slash_hit:
-  - {fileID: 8300000, guid: fe26882b4c419d44b99f14695ff632fb, type: 3}
-  - {fileID: 8300000, guid: 1773808490bc6c141ba64c6b6e9b9e30, type: 3}
+  - {fileID: 8300000, guid: 29a34bb985c9a454b8d516abf4245204, type: 3}
+  - {fileID: 8300000, guid: ae58ef7ca4a93744eadea31ad8519f39, type: 3}
   rb: {fileID: 2836362532131447323}
   animator: {fileID: 2131295903}
   audioSource: {fileID: 6899847622165140833}
