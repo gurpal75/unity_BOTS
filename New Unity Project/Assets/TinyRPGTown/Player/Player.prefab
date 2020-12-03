@@ -41,7 +41,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 3b9dab277d609f341bfdd8161f678f26, type: 3}
+  m_audioClip: {fileID: 8300000, guid: e0cc7eca8203fe74a929380be2604d13, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 0.6
   m_Pitch: 1
@@ -290,8 +290,8 @@ MonoBehaviour:
   moveSpeed: 4
   footstepsSoundRate: 0.35
   slashAngleOffset: -45
-  attackRate: 0.5
-  attackRange: 1
+  attackRate: 0.2
+  attackRange: 1.2
   attackOffsetY: 0.4
   attackLayer:
     serializedVersion: 2
