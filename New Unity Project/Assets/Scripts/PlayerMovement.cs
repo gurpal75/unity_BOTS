@@ -4,8 +4,14 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    [Header("Parameters")]
+
     public float moveSpeed = 5f;
+
+    [Header("Components")]
+
     public Rigidbody2D rb;
+    public Animator animator;
 
     Vector2 delta;
 
@@ -18,6 +24,15 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        rb.MovePosition(rb.position + delta * moveSpeed * Time.fixedDeltaTime);
+        bool moving = delta != Vector2.zero;
+
+        animator.SetBool("Moving", moving);
+        animator.SetFloat("Horizontal", delta.x);
+        animator.SetFloat("Vertical", delta.y);
+
+        if (moving)
+        {
+            rb.MovePosition(rb.position + delta * moveSpeed * Time.fixedDeltaTime);
+        }
     }
 }
