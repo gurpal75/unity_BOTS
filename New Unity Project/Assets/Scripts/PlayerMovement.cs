@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.PostProcessing;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -27,8 +28,10 @@ public class PlayerMovement : MonoBehaviour
     public Rigidbody2D rb;
     public Animator animator;
     public AudioSource audioSource;
+    public AudioSource musicSource;
     public SpriteRenderer slashFX;
     public CinemachineVirtualCamera cmr;
+    public PostProcessVolume volume;
 
     Vector2 delta;
     Vector2 lastDirection;
@@ -36,8 +39,15 @@ public class PlayerMovement : MonoBehaviour
     float footstep_timer = 0f;
     float attack_timer = 0f;
     float shakeTimer = 0f;
+    float[] samples = new float[64];
+    bool musicPaused = false;
+
+    float musicMomentum = 0f;
+    float musicIntensity = 0f;
 
     CinemachineBasicMultiChannelPerlin noise;
+    ChromaticAberration chromatic;
+    ColorGrading grading;
 
     private void Awake()
     {
@@ -46,33 +56,95 @@ public class PlayerMovement : MonoBehaviour
             noise = cmr.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
             noise.m_AmplitudeGain = 0f;
         }
+
+        if (volume != null)
+        {
+            chromatic = volume.profile.GetSetting<ChromaticAberration>();
+            grading = volume.profile.GetSetting<ColorGrading>();
+        }
     }
 
     void Update()
     {
+        // Handle music logic
+        musicSource.volume = musicMomentum;
+        musicMomentum = Mathf.MoveTowards(musicMomentum, 0f, Time.deltaTime * 0.5f);
+
+        if (musicSource.isPlaying && !musicPaused && musicMomentum == 0)
+        {
+            musicSource.Pause();
+            musicPaused = true;
+        }
+
+        // Get the music rithm
+        float sample = GetMusicRythm();
+
+        // Use it for screen effects
+        VisualEffectsByMusic(sample);
+
+        // Move the player with input, attack on input, etc
+        ProcessInput();
+
+        // Camera shake logic
+        CameraShake();
+    }
+
+    private void VisualEffectsByMusic(float sample)
+    {
+        if (chromatic != null)
+        {
+            chromatic.intensity.value = sample;
+
+            var currentColor = grading.colorFilter.value;
+            var targetColor = Color.Lerp(Color.white, Color.red, (sample + (musicMomentum / 10f)) * 0.5f);
+            grading.colorFilter.value = Color.Lerp(currentColor, targetColor, Time.deltaTime * 10f);
+        }
+    }
+
+    private float GetMusicRythm()
+    {
+        musicSource.GetSpectrumData(this.samples, 0, FFTWindow.BlackmanHarris);
+
+        float sample = samples[0];
+
+        if (sample > musicIntensity) musicIntensity = sample;
+
+        musicIntensity = Mathf.MoveTowards(musicIntensity, sample, Time.deltaTime);
+
+        return sample;
+    }
+
+    private void ProcessInput()
+    {
+        // Get user input to move
         delta.x = -Input.GetAxisRaw("Horizontal");
         delta.y = Input.GetAxisRaw("Vertical");
 
+        // Keep track of the facing direction
         if (delta != Vector2.zero)
             lastDirection = delta;
 
+        // Attack logic
         if (Input.GetMouseButtonDown(0) && Time.time - attack_timer > attackRate)
         {
             animator.SetTrigger("Attack");
             attack_timer = Time.time;
             attackDir = lastDirection;
         }
+    }
 
+    private void CameraShake()
+    {
         if (noise != null)
         {
             if (shakeTimer > 0)
             {
-                noise.m_AmplitudeGain = Mathf.Lerp(noise.m_AmplitudeGain, 2f, Time.deltaTime * 10f);
+                noise.m_AmplitudeGain = Mathf.Lerp(noise.m_AmplitudeGain, Mathf.Min(2f, musicMomentum * 5f), Time.deltaTime * 10f);
                 shakeTimer -= Time.deltaTime;
             }
             else
             {
-                noise.m_AmplitudeGain = Mathf.Lerp(noise.m_AmplitudeGain, 0f, Time.deltaTime * 10f);
+                noise.m_AmplitudeGain = Mathf.Lerp(noise.m_AmplitudeGain, musicIntensity * musicMomentum * 0.15f, Time.deltaTime * 10f);
             }
         }
     }
@@ -101,7 +173,7 @@ public class PlayerMovement : MonoBehaviour
             Vector2 direction = (entity.transform.position - transform.position).normalized;
 
             // Make sure we are facing it before we attack it
-            if (Vector2.Dot(direction, attackDir.normalized) > 0.5f)
+            if (Vector2.Dot(direction, attackDir.normalized) > -0.3f)
             {
                 entity.TakeDamage(playerDmg, direction * 50f);
                 hitSomething = true;
@@ -118,7 +190,27 @@ public class PlayerMovement : MonoBehaviour
 
         if (hitSomething)
         {
-            ShakeCamera(0.1f);
+            OnHitSomething();
+        }
+    }
+
+    void OnHitSomething()
+    {
+        ShakeCamera(0.1f);
+
+        // Resume music
+        musicMomentum = 1f + musicMomentum;
+        if (musicMomentum > 10f)
+            musicMomentum = 10f;
+
+        if (musicPaused)
+        {
+            musicSource.UnPause();
+        }
+        else if (!musicSource.isPlaying)
+        {
+            Debug.Log("Play");
+            musicSource.Play();
         }
     }
 
@@ -127,16 +219,18 @@ public class PlayerMovement : MonoBehaviour
     {
         bool moving = delta != Vector2.zero;
 
+        // Handle animations
         animator.SetBool("Moving", moving);
         animator.SetFloat("Horizontal", lastDirection.x);
         animator.SetFloat("Vertical", lastDirection.y);
 
+        // If moving, move the actual position
         if (moving)
         {
             rb.MovePosition(rb.position + delta * moveSpeed * Time.fixedDeltaTime);
 
+            // Handle the footstep sounds here
             footstep_timer += Time.fixedDeltaTime;
-
             if (footstep_timer > footstepsSoundRate)
             {
                 audioSource.PlayOneShot(footsteps[Random.Range(0, footsteps.Length)]);
