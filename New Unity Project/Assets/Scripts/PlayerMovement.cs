@@ -20,6 +20,11 @@ public class PlayerMovement : MonoBehaviour
 
     public GameObject redExplosion;
 
+    [Header("Lasers")]
+
+    public SpriteRenderer laserLeft;
+    public SpriteRenderer laserRight;
+
     [Header("Sounds")]
 
     public AudioClip[] footsteps;
@@ -45,9 +50,13 @@ public class PlayerMovement : MonoBehaviour
     float shakeTimer = 0f;
     float[] samples = new float[64];
     bool musicPaused = false;
+    float laserDestroyTimer = 0f;
+    bool shootingLaser = false;
+    float laserIntensity = 0f;
 
     float musicMomentum = 0f;
     float musicIntensity = 0f;
+    float knockbackIntensity = 0f;
 
     CinemachineBasicMultiChannelPerlin noise;
     ChromaticAberration chromatic;
@@ -72,9 +81,12 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        // Get the music rithm
+        float sample = GetMusicRythm();
+
         // Handle music logic
         musicSource.volume = musicMomentum;
-        musicMomentum = Mathf.MoveTowards(musicMomentum, 0f, Time.deltaTime * 0.5f);
+        musicMomentum = Mathf.MoveTowards(musicMomentum, 0f, Time.deltaTime * 0.2f);
 
         if (musicSource.isPlaying && !musicPaused && musicMomentum == 0)
         {
@@ -82,8 +94,48 @@ public class PlayerMovement : MonoBehaviour
             musicPaused = true;
         }
 
-        // Get the music rithm
-        float sample = GetMusicRythm();
+        if (musicMomentum > 5f && (sample / musicSource.volume) > 0.6f)
+             laserIntensity = Mathf.Lerp(laserIntensity, 1f, Time.deltaTime * 50f);
+        else laserIntensity = Mathf.MoveTowards(laserIntensity, 0f, Time.deltaTime);
+
+        if (laserIntensity > 0.001f)
+        {
+            if (!shootingLaser)
+            {
+                shootingLaser = true;
+                laserLeft.enabled = true;
+                laserRight.enabled = true;
+            }
+
+            knockbackIntensity = 2f;
+
+            var mouseDir = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position;
+            float angleForward = Vector2.SignedAngle(Vector2.up, mouseDir) - 90f;
+            laserLeft.transform.eulerAngles = new Vector3(0, 0, angleForward);
+            laserRight.transform.eulerAngles = new Vector3(0, 0, angleForward);
+
+            RaycastHit2D lhit = Physics2D.Raycast(laserLeft.transform.position, mouseDir, 500f, attackLayer);
+            RaycastHit2D rhit = Physics2D.Raycast(laserRight.transform.position, mouseDir, 500f, attackLayer);
+
+            float width = Mathf.Lerp(0f, 0.21f, laserIntensity);
+
+            laserLeft.transform.localScale = new Vector3(lhit.collider == null ? 500f : lhit.distance, width, 1f);
+            laserRight.transform.localScale = new Vector3(rhit.collider == null ? 500f : rhit.distance, width, 1f);
+
+            if (Time.time - (laserDestroyTimer + (1f - laserIntensity)) > 0.1f)
+            {
+                laserDestroyTimer = Time.time;
+                if (lhit.collider != null) Instantiate(redExplosion, lhit.point, Quaternion.identity);
+                if (rhit.collider != null) Instantiate(redExplosion, rhit.point, Quaternion.identity);
+            }
+        }
+        else if (shootingLaser)
+        {
+            shootingLaser = false;
+            laserLeft.enabled = false;
+            laserRight.enabled = false;
+            knockbackIntensity = 0f;
+        }
 
         // Use it for screen effects
         VisualEffectsByMusic(sample);
@@ -215,7 +267,7 @@ public class PlayerMovement : MonoBehaviour
         ShakeCamera(0.1f);
 
         // Resume music
-        musicMomentum = 1f + musicMomentum;
+        musicMomentum = 0.5f + musicMomentum;
         if (musicMomentum > 10f)
             musicMomentum = 10f;
 
@@ -225,11 +277,9 @@ public class PlayerMovement : MonoBehaviour
         }
         else if (!musicSource.isPlaying)
         {
-            Debug.Log("Play");
             musicSource.Play();
         }
     }
-
 
     void FixedUpdate()
     {
@@ -240,10 +290,13 @@ public class PlayerMovement : MonoBehaviour
         animator.SetFloat("Horizontal", lastDirection.x);
         animator.SetFloat("Vertical", lastDirection.y);
 
+        Vector2 mouseDir = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position;
+        Vector2 knockBack = -mouseDir * knockbackIntensity * Time.fixedDeltaTime;
+
         // If moving, move the actual position
-        if (moving)
+        if (moving || knockBack != Vector2.zero)
         {
-            rb.MovePosition(rb.position + delta * moveSpeed * Time.fixedDeltaTime);
+            rb.MovePosition(rb.position + delta * moveSpeed * Time.fixedDeltaTime + knockBack.normalized);
 
             // Handle the footstep sounds here
             footstep_timer += Time.fixedDeltaTime;
