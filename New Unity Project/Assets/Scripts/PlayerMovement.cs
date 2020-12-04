@@ -38,6 +38,7 @@ public class PlayerMovement : MonoBehaviour
     public Animator animator;
     public AudioSource audioSource;
     public AudioSource musicSource;
+    public AudioSource fireSource;
     public SpriteRenderer slashFX;
     public CinemachineVirtualCamera cmr;
     public PostProcessVolume volume;
@@ -94,9 +95,11 @@ public class PlayerMovement : MonoBehaviour
             musicPaused = true;
         }
 
-        if (musicMomentum > 5f && (sample / musicSource.volume) > 0.6f)
+        if (musicMomentum > 5f && (sample / musicSource.volume) > 0.7f)
              laserIntensity = Mathf.Lerp(laserIntensity, 1f, Time.deltaTime * 50f);
         else laserIntensity = Mathf.MoveTowards(laserIntensity, 0f, Time.deltaTime);
+
+        fireSource.volume = laserIntensity;
 
         if (laserIntensity > 0.001f)
         {
@@ -291,12 +294,12 @@ public class PlayerMovement : MonoBehaviour
         animator.SetFloat("Vertical", lastDirection.y);
 
         Vector2 mouseDir = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position;
-        Vector2 knockBack = -mouseDir * knockbackIntensity * Time.fixedDeltaTime;
+        Vector2 knockBack = -mouseDir.normalized * knockbackIntensity * Time.fixedDeltaTime;
 
         // If moving, move the actual position
         if (moving || knockBack != Vector2.zero)
         {
-            rb.MovePosition(rb.position + delta * moveSpeed * Time.fixedDeltaTime + knockBack.normalized);
+            rb.MovePosition(rb.position + delta * moveSpeed * Time.fixedDeltaTime + knockBack);
 
             // Handle the footstep sounds here
             footstep_timer += Time.fixedDeltaTime;
