@@ -25,6 +25,7 @@ public class PlayerMovement : MonoBehaviour
     public AudioClip[] footsteps;
     public AudioClip[] slash;
     public AudioClip[] slash_hit;
+    public AudioClip[] music;
 
     [Header("Components")]
 
@@ -65,6 +66,8 @@ public class PlayerMovement : MonoBehaviour
             chromatic = volume.profile.GetSetting<ChromaticAberration>();
             grading = volume.profile.GetSetting<ColorGrading>();
         }
+
+        musicSource.clip = music[Random.Range(0, music.Length)];
     }
 
     void Update()

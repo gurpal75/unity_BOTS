@@ -306,6 +306,12 @@ MonoBehaviour:
   slash_hit:
   - {fileID: 8300000, guid: 29a34bb985c9a454b8d516abf4245204, type: 3}
   - {fileID: 8300000, guid: ae58ef7ca4a93744eadea31ad8519f39, type: 3}
+  music:
+  - {fileID: 8300000, guid: 2ded03fe4af064040aecb1a482ef18cf, type: 3}
+  - {fileID: 8300000, guid: 3b9dab277d609f341bfdd8161f678f26, type: 3}
+  - {fileID: 8300000, guid: 57dc4c6fb660fa24a9512db556139a49, type: 3}
+  - {fileID: 8300000, guid: e0cc7eca8203fe74a929380be2604d13, type: 3}
+  - {fileID: 8300000, guid: 61740901bcccf6647a3c8af9db69b545, type: 3}
   rb: {fileID: 2836362532131447323}
   animator: {fileID: 2131295903}
   audioSource: {fileID: 6899847622165140833}
