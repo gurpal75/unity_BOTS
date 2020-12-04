@@ -6,6 +6,8 @@ using UnityEngine.Rendering.PostProcessing;
 
 public class PlayerMovement : MonoBehaviour
 {
+    public static PlayerMovement me;
+
     [Header("Parameters")]
 
     public float moveSpeed = 5f;
@@ -24,6 +26,10 @@ public class PlayerMovement : MonoBehaviour
 
     public SpriteRenderer laserLeft;
     public SpriteRenderer laserRight;
+
+    [Header("Spawner")]
+
+    public GameObject[] enemies;
 
     [Header("Sounds")]
 
@@ -54,6 +60,7 @@ public class PlayerMovement : MonoBehaviour
     float laserDestroyTimer = 0f;
     bool shootingLaser = false;
     float laserIntensity = 0f;
+    float spawnerTime = 0f;
 
     float musicMomentum = 0f;
     float musicIntensity = 0f;
@@ -65,6 +72,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void Awake()
     {
+        me = this;
+
         if (cmr != null)
         {
             noise = cmr.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
@@ -89,6 +98,43 @@ public class PlayerMovement : MonoBehaviour
         musicSource.volume = musicMomentum;
         musicMomentum = Mathf.MoveTowards(musicMomentum, 0f, Time.deltaTime * 0.2f);
 
+        // Spawn policemen
+        SpawnerLogic();
+
+        // SHOOT LASERS THROUGH THE EYES
+        LaserLogic(sample);
+
+        // Use it for screen effects
+        VisualEffectsByMusic(sample);
+
+        // Move the player with input, attack on input, etc
+        ProcessInput();
+
+        // Camera shake logic
+        CameraShake();
+    }
+
+    private void SpawnerLogic()
+    {
+        if (musicMomentum > 0)
+        {
+            if (Time.time - spawnerTime > 0.5f && NPCBrain.NPCCount < 10)
+            {
+                int count = Mathf.FloorToInt(musicMomentum * 0.6f);
+
+                for (int i = 0; i < count; ++i)
+                {
+                    var pos = Random.insideUnitCircle.normalized * Random.Range(20f, 25f);
+                    Instantiate(enemies[Random.Range(0, enemies.Length)], pos, Quaternion.identity);
+                }
+
+                spawnerTime = Time.time;
+            }
+        }
+    }
+
+    private void LaserLogic(float sample)
+    {
         if (musicSource.isPlaying && !musicPaused && musicMomentum == 0)
         {
             musicSource.Pause();
@@ -96,7 +142,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         if (musicMomentum > 5f && (sample / musicSource.volume) > 0.7f)
-             laserIntensity = Mathf.Lerp(laserIntensity, 1f, Time.deltaTime * 50f);
+            laserIntensity = Mathf.Lerp(laserIntensity, 1f, Time.deltaTime * 50f);
         else laserIntensity = Mathf.MoveTowards(laserIntensity, 0f, Time.deltaTime);
 
         fireSource.volume = laserIntensity;
@@ -128,8 +174,16 @@ public class PlayerMovement : MonoBehaviour
             if (Time.time - (laserDestroyTimer + (1f - laserIntensity)) > 0.1f)
             {
                 laserDestroyTimer = Time.time;
-                if (lhit.collider != null) Instantiate(redExplosion, lhit.point, Quaternion.identity);
-                if (rhit.collider != null) Instantiate(redExplosion, rhit.point, Quaternion.identity);
+                if (lhit.collider != null)
+                {
+                    AttackCollider(lhit.collider, 10f);
+                    Instantiate(redExplosion, lhit.point, Quaternion.identity);
+                }
+                if (rhit.collider != null)
+                {
+                    AttackCollider(rhit.collider, 10f);
+                    Instantiate(redExplosion, rhit.point, Quaternion.identity);
+                }
             }
         }
         else if (shootingLaser)
@@ -139,15 +193,6 @@ public class PlayerMovement : MonoBehaviour
             laserRight.enabled = false;
             knockbackIntensity = 0f;
         }
-
-        // Use it for screen effects
-        VisualEffectsByMusic(sample);
-
-        // Move the player with input, attack on input, etc
-        ProcessInput();
-
-        // Camera shake logic
-        CameraShake();
     }
 
     private void VisualEffectsByMusic(float sample)
@@ -215,6 +260,30 @@ public class PlayerMovement : MonoBehaviour
         shakeTimer = time;
     }
 
+    public void AttackCollider(Collider2D c, float dmg)
+    {
+        if (c == null) return;
+
+        var entity = c.GetComponent<Entity>();
+
+        if (entity == null)
+        {
+            entity = c.GetComponentInParent<Entity>();
+            if (entity == null) return;
+        }
+
+        Vector2 direction = (entity.transform.position - transform.position).normalized;
+
+        // Make sure we are facing it before we attack it
+        // if (Vector2.Dot(direction, attackDir.normalized) > -0.3f)
+        {
+            var collisionPoint = c.bounds.ClosestPoint(transform.position);
+            Instantiate(redExplosion, collisionPoint, Quaternion.identity);
+
+            entity.TakeDamage(dmg, direction * 50f);
+        }
+    }
+
     // This method is called by the animation
     void Attack()
     {
@@ -245,8 +314,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 var collisionPoint = collisions[i].bounds.ClosestPoint(transform.position);
                 Instantiate(redExplosion, collisionPoint, Quaternion.identity);
-
-                entity.TakeDamage(playerDmg, direction * 50f);
+                entity.TakeDamage(playerDmg + (musicMomentum / 10f) * 3f, direction * 50f);
                 hitSomething = true;
             }
         }

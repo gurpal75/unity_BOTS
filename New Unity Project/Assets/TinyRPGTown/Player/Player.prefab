@@ -367,9 +367,9 @@ CircleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0, y: 0.25}
   serializedVersion: 2
-  m_Radius: 0.1
+  m_Radius: 0.28
 --- !u!50 &2836362532131447323
 Rigidbody2D:
   serializedVersion: 4
@@ -382,7 +382,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 1
-  m_Mass: 0.03141593
+  m_Mass: 0.24630086
   m_LinearDrag: 10
   m_AngularDrag: 0.05
   m_GravityScale: 0
@@ -411,11 +411,13 @@ MonoBehaviour:
   attackOffsetY: 0.4
   attackLayer:
     serializedVersion: 2
-    m_Bits: 823
+    m_Bits: 2871
   playerDmg: 1
   redExplosion: {fileID: 100000, guid: 092aeef3857c50f41ada30e877c781cd, type: 3}
   laserLeft: {fileID: 4167091854675860127}
   laserRight: {fileID: 7510861690536614386}
+  enemies:
+  - {fileID: 60719271910103475, guid: 63539f1da77fd5c47a58413b7e83f2e5, type: 3}
   footsteps:
   - {fileID: 8300000, guid: 3d38577339186ec4095055b7ecf21b97, type: 3}
   - {fileID: 8300000, guid: d1eb874dbee56714a919ef1f84b8e44b, type: 3}
@@ -463,6 +465,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10d216f88bb979843b2c404645061d77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  colliders: []
+  health: 10
+  immortal: 1
+  destroyOnDeath: 0
 --- !u!1 &4528554674103770056
 GameObject:
   m_ObjectHideFlags: 0

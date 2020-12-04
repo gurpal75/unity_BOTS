@@ -21259,10 +21259,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: BigHouse
       objectReference: {fileID: 0}
-    - target: {fileID: 5280405921583559219, guid: 5dab5dd5fa8706f4e9bb06e2748452f5, type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 5280405921583559223, guid: 5dab5dd5fa8706f4e9bb06e2748452f5, type: 3}
       propertyPath: m_LocalPosition.x
       value: -7.31
@@ -21359,10 +21355,6 @@ PrefabInstance:
     - target: {fileID: 4174824726235870291, guid: e03186475b486b94bb26ffb3352f24e2, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4174824726235870295, guid: e03186475b486b94bb26ffb3352f24e2, type: 3}
-      propertyPath: m_Mesh
-      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 4174824726235871148, guid: e03186475b486b94bb26ffb3352f24e2, type: 3}
       propertyPath: m_Name

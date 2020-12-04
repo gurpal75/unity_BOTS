@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 5280405919883881718}
   - component: {fileID: 2276949599697559175}
   - component: {fileID: 7776676730490081058}
-  m_Layer: 9
+  m_Layer: 0
   m_Name: Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -231,7 +231,7 @@ GameObject:
   - component: {fileID: 5280405921583559222}
   - component: {fileID: 5280405921583559217}
   - component: {fileID: 5280405921583559216}
-  m_Layer: 9
+  m_Layer: 0
   m_Name: BigHouse
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -443,3 +443,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10d216f88bb979843b2c404645061d77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  health: 10
+  destroyOnDeath: 0
