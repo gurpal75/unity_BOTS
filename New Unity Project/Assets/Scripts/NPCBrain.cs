@@ -44,26 +44,39 @@ public class NPCBrain : MonoBehaviour
             return;
         }
 
-        Vector3 playerDir = (PlayerMovement.me.transform.position - transform.position);
+
+        if (PlayerMovement.me.IsVandalising())
+        {
+            WalkTowards(PlayerMovement.me.transform.position, out Vector3 playerDir);
+
+            if (playerDir.sqrMagnitude < 15f && fireTimer > fireRate)
+            {
+                Fire(playerDir);
+                fireTimer = 0f;
+            }
+
+            fireTimer += Time.deltaTime;
+        }
+        else
+        {
+            WalkTowards(transform.position, out Vector3 dir);
+        }
+    }
+
+    private void WalkTowards(Vector3 target, out Vector3 dir)
+    {
         bool walking = false;
 
-        if (playerDir.sqrMagnitude > 5f)
+        dir = (target - transform.position);
+
+        if (dir.sqrMagnitude > 5f)
         {
-            rb.AddForce(playerDir.normalized * moveSpeed);
+            rb.AddForce(dir.normalized * moveSpeed);
             walking = true;
         }
 
-        sprite.flipX = playerDir.x < 0;
-
         animator.SetBool("walk", walking);
-
-        if (playerDir.sqrMagnitude < 15f && fireTimer > fireRate)
-        {
-            Fire(playerDir);
-            fireTimer = 0f;
-        }
-
-        fireTimer += Time.deltaTime;
+        sprite.flipX = dir.x < 0;
     }
 
     void Fire(Vector2 dir)

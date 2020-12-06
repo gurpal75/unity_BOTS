@@ -26,6 +26,7 @@ public class PlayerMovement : MonoBehaviour
 
     public SpriteRenderer laserLeft;
     public SpriteRenderer laserRight;
+    public SpriteRenderer sign;
 
     [Header("Spawner")]
 
@@ -49,6 +50,18 @@ public class PlayerMovement : MonoBehaviour
     public CinemachineVirtualCamera cmr;
     public PostProcessVolume volume;
 
+    [Header("Time")]
+
+    public int dayCount = 10;
+    public float timeSpeedUp = 5f;
+    public float dayInMinutes = 3f;
+
+    [Header("UI")]
+
+    public TMPro.TMP_Text timeOfDayTxt;
+    public RectTransform progressTime;
+    public Transform townHall;
+
     Vector2 delta;
     Vector2 lastDirection;
     Vector2 attackDir;
@@ -65,10 +78,24 @@ public class PlayerMovement : MonoBehaviour
     float musicMomentum = 0f;
     float musicIntensity = 0f;
     float knockbackIntensity = 0f;
+    float timeSpeed = 1f;
+
+    float vandalismRate = 0f;
+    float timeOfDaySeconds = 0f;
 
     CinemachineBasicMultiChannelPerlin noise;
     ChromaticAberration chromatic;
     ColorGrading grading;
+
+    public float GetVandalismRate()
+    {
+        return vandalismRate;
+    }
+
+    public bool IsVandalising()
+    {
+        return musicMomentum > 0;
+    }
 
     private void Awake()
     {
@@ -96,7 +123,25 @@ public class PlayerMovement : MonoBehaviour
 
         // Handle music logic
         musicSource.volume = musicMomentum;
+
+        if (musicSource.volume != 0 && !musicSource.isPlaying)
+        {
+            musicSource.Play();
+        }
+
+        if (musicSource.volume == 0f)
+            musicSource.clip = music[Random.Range(0, music.Length)];
         musicMomentum = Mathf.MoveTowards(musicMomentum, 0f, Time.deltaTime * 0.2f);
+
+        if (!IsVandalising() && Vector3.Distance(transform.position, townHall.position) < 10f)
+        {
+            sign.enabled = true;
+            sign.transform.localPosition = new Vector3(0, (1f + Mathf.Sin(Time.time * 5f)) * 0.1f, 0);
+        }
+        else
+        {
+            sign.enabled = false;
+        }
 
         // Spawn policemen
         SpawnerLogic();
@@ -112,6 +157,42 @@ public class PlayerMovement : MonoBehaviour
 
         // Camera shake logic
         CameraShake();
+
+        // Day logic
+        timeOfDaySeconds += Time.deltaTime;
+
+        float dayInSeconds = dayInMinutes * 60;
+        float hour = ((timeOfDaySeconds % dayInSeconds) / dayInSeconds) * 24f;
+        int hour_int = Mathf.FloorToInt(hour);
+        int min_int = Mathf.FloorToInt((hour - hour_int) * 60);
+
+        timeOfDayTxt.SetText(string.Format("{0}h {1}",
+            hour_int.ToString("00"),
+            min_int.ToString("00")));
+
+        float fullTime = dayCount * dayInSeconds;
+
+        progressTime.localScale = new Vector3(timeOfDaySeconds / fullTime, 1, 1);
+    }
+
+    private void TimeLogic(bool moving)
+    {
+        if (Input.GetKey(KeyCode.Space) && !moving)
+        {
+            timeSpeed = Mathf.MoveTowards(timeSpeed, timeSpeedUp, Time.unscaledDeltaTime * 5f);
+        }
+        else
+        {
+            timeSpeed = Mathf.MoveTowards(timeSpeed, 1f, Time.unscaledDeltaTime * 5f);
+        }
+
+        if (timeSpeed != Time.timeScale)
+        {
+            Time.timeScale = timeSpeed;
+            musicSource.pitch = Mathf.Min(timeSpeed, 3f);
+            animator.speed = 1f / timeSpeed;
+            grading.saturation.value = Mathf.Lerp(0, -100, (timeSpeed - 1f) / (timeSpeedUp - 1));
+        }
     }
 
     private void SpawnerLogic()
@@ -225,6 +306,8 @@ public class PlayerMovement : MonoBehaviour
         // Get user input to move
         delta.x = -Input.GetAxisRaw("Horizontal");
         delta.y = Input.GetAxisRaw("Vertical");
+
+        TimeLogic(delta != Vector2.zero);
 
         // Keep track of the facing direction
         if (delta != Vector2.zero)
@@ -362,15 +445,15 @@ public class PlayerMovement : MonoBehaviour
         animator.SetFloat("Vertical", lastDirection.y);
 
         Vector2 mouseDir = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position;
-        Vector2 knockBack = -mouseDir.normalized * knockbackIntensity * Time.fixedDeltaTime;
+        Vector2 knockBack = -mouseDir.normalized * knockbackIntensity * Time.fixedUnscaledDeltaTime;
 
         // If moving, move the actual position
         if (moving || knockBack != Vector2.zero)
         {
-            rb.MovePosition(rb.position + delta * moveSpeed * Time.fixedDeltaTime + knockBack);
+            rb.MovePosition(rb.position + delta * moveSpeed * Time.fixedUnscaledDeltaTime + knockBack);
 
             // Handle the footstep sounds here
-            footstep_timer += Time.fixedDeltaTime;
+            footstep_timer += Time.fixedUnscaledDeltaTime;
             if (footstep_timer > footstepsSoundRate)
             {
                 audioSource.PlayOneShot(footsteps[Random.Range(0, footsteps.Length)]);

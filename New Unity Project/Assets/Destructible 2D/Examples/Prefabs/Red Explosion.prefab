@@ -49,14 +49,14 @@ MonoBehaviour:
     m_Bits: 4294967295
   Stamp: 1
   StampTex: {fileID: 2800000, guid: fef0ca7c77c683d4da0b22b25f9ed8ad, type: 3}
-  StampSize: {x: 1.5, y: 1.5}
-  StampHardness: 0.2
+  StampSize: {x: 1.4, y: 1.4}
+  StampHardness: 0.1
   StampRandomDirection: 1
   Raycast: 1
-  RaycastRadius: 1
+  RaycastRadius: 3
   RaycastCount: 32
   ForcePerRay: 20
-  DamagePerRay: 1
+  DamagePerRay: 0.2
 --- !u!114 &11401416
 MonoBehaviour:
   m_ObjectHideFlags: 0
