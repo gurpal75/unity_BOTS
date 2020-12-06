@@ -96950,6 +96950,10 @@ PrefabInstance:
       propertyPath: resumeTxt
       value: 
       objectReference: {fileID: 932552121}
+    - target: {fileID: 2836362532131447325, guid: 763ca9a64cf15414582d5eca8eb73c2f, type: 3}
+      propertyPath: spawner
+      value: 
+      objectReference: {fileID: 1882646087}
     - target: {fileID: 3521420914164801749, guid: 763ca9a64cf15414582d5eca8eb73c2f, type: 3}
       propertyPath: m_SortingOrder
       value: -940

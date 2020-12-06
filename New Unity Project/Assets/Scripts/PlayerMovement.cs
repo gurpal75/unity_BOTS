@@ -287,7 +287,7 @@ public class PlayerMovement : MonoBehaviour
         Entity.Destroyed = 0;
 
         float destructionPercent = killingRate * 0.3f + destructionRate * 0.7f;
-        float taxesIncrease = (todayEarnings * destructionPercent) * 0.1f;
+        float taxesIncrease = (todayEarnings * destructionPercent) * 0.01f;
 
         taxes += taxesIncrease;
 
