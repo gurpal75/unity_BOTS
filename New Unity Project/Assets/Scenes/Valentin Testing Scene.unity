@@ -96854,30 +96854,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 2836362532131447321, guid: 763ca9a64cf15414582d5eca8eb73c2f, type: 3}
-      propertyPath: m_FlipX
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2836362532131447321, guid: 763ca9a64cf15414582d5eca8eb73c2f, type: 3}
-      propertyPath: m_FlipY
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2836362532131447321, guid: 763ca9a64cf15414582d5eca8eb73c2f, type: 3}
-      propertyPath: m_Color.r
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2836362532131447321, guid: 763ca9a64cf15414582d5eca8eb73c2f, type: 3}
-      propertyPath: m_Color.g
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2836362532131447321, guid: 763ca9a64cf15414582d5eca8eb73c2f, type: 3}
-      propertyPath: m_Color.b
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2836362532131447321, guid: 763ca9a64cf15414582d5eca8eb73c2f, type: 3}
-      propertyPath: m_SortingOrder
-      value: -923
-      objectReference: {fileID: 0}
     - target: {fileID: 2836362532131447322, guid: 763ca9a64cf15414582d5eca8eb73c2f, type: 3}
       propertyPath: m_LocalPosition.x
       value: 15.43
@@ -96927,17 +96903,13 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1666300559}
     - target: {fileID: 2836362532131447325, guid: 763ca9a64cf15414582d5eca8eb73c2f, type: 3}
+      propertyPath: spawner
+      value: 
+      objectReference: {fileID: 1882646087}
+    - target: {fileID: 2836362532131447325, guid: 763ca9a64cf15414582d5eca8eb73c2f, type: 3}
       propertyPath: timeOfDayTxt
       value: 
       objectReference: {fileID: 677079095}
-    - target: {fileID: 2836362532131447325, guid: 763ca9a64cf15414582d5eca8eb73c2f, type: 3}
-      propertyPath: progressTime
-      value: 
-      objectReference: {fileID: 1631237114}
-    - target: {fileID: 2836362532131447325, guid: 763ca9a64cf15414582d5eca8eb73c2f, type: 3}
-      propertyPath: townHall
-      value: 
-      objectReference: {fileID: 205904169}
     - target: {fileID: 2836362532131447325, guid: 763ca9a64cf15414582d5eca8eb73c2f, type: 3}
       propertyPath: salaryTxt
       value: 
@@ -96951,13 +96923,13 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 932552121}
     - target: {fileID: 2836362532131447325, guid: 763ca9a64cf15414582d5eca8eb73c2f, type: 3}
-      propertyPath: spawner
+      propertyPath: progressTime
       value: 
-      objectReference: {fileID: 1882646087}
-    - target: {fileID: 3521420914164801749, guid: 763ca9a64cf15414582d5eca8eb73c2f, type: 3}
-      propertyPath: m_SortingOrder
-      value: -940
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1631237114}
+    - target: {fileID: 2836362532131447325, guid: 763ca9a64cf15414582d5eca8eb73c2f, type: 3}
+      propertyPath: townHall
+      value: 
+      objectReference: {fileID: 205904169}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 763ca9a64cf15414582d5eca8eb73c2f, type: 3}
 --- !u!1001 &3761152556278216639

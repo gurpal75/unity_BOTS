@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.SceneManagement;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -135,6 +136,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Awake()
     {
+        salary = 2333f * (1f - taxes);
         spawnLocation = transform.position;
         me = this;
 
@@ -154,6 +156,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     bool pausedTime = false;
+    bool wasalive = true;
 
     void Update()
     {
@@ -166,6 +169,7 @@ public class PlayerMovement : MonoBehaviour
                 UnpauseTime();
 
             TimeLogic(true);
+            VisualEffectsByMusic(0f);
             return;
         }
 
@@ -176,6 +180,14 @@ public class PlayerMovement : MonoBehaviour
         float sample = GetMusicRythm();
 
         bool alive = entity.Alive();
+
+        if (alive != wasalive)
+        {
+            wasalive = alive;
+
+            if (!alive)
+                NextDayMenu();
+        }
 
         // Handle music logic
         musicSource.volume = musicMomentum;
@@ -241,9 +253,9 @@ public class PlayerMovement : MonoBehaviour
                 NextDayMenu();
             }
 
-            timeOfDayTxt.SetText(string.Format("{0}h {1}",
+            timeOfDayTxt.SetText(string.Format("{0}h {1}\n{2} HP",
                 hour_int.ToString("00"),
-                min_int.ToString("00")));
+                min_int.ToString("00"), Mathf.FloorToInt((entity.health / 20f) * 100f)));
 
             float fullTime = dayCount * dayInSeconds;
 
@@ -270,6 +282,23 @@ public class PlayerMovement : MonoBehaviour
         vandalized = false;
     }
 
+    void SetFinishScreen()
+    {
+        float fullTime = dayCount * dayInMinutes * 60f;
+
+        salaryTxt.SetText("");
+        taxesTxt.SetText("");
+        timeOfDayTxt.SetText("");
+
+        var resume = string.Format("Current Salary: {0}$\nCurrent Taxes: {1}\nTotal Earned: {2}$\nScore: {3}\n\nPress Space to continue ...",
+                salary.ToString("0.00"),
+                (taxes * 100f).ToString("0.00"),
+                totalEarnigs.ToString("0.00"),
+                Mathf.FloorToInt((totalEarnigs * taxes + salary) * 0.1562f) * (timeOfDaySeconds / fullTime));
+
+        resumeTxt.SetText(resume);
+    }
+
     void NextDayMenu()
     {
         pausedTime = true;
@@ -291,18 +320,29 @@ public class PlayerMovement : MonoBehaviour
 
         taxes += taxesIncrease;
 
-        string incdec = taxes > 0 ? "increased" : "decreased";
+        if (taxes < 0.2f) taxes = 0.2f;
+        if (taxes > 0.9f) taxes = 0.9f;
+
+        salary = 2333f * (1f - taxes);
+
+        string incdec = (taxes - lastTaxes) > 0 ? "increased" : "decreased";
         string resume = string.Format(
             "<b>Day {0}</b>\n\n"+
-            "You earned {1}$ and " + incdec + " the taxes amount by {2}% today.\n" + 
+            "You earned {1}$ and " + incdec + " the taxes amount by {2}% today.\n" +
             "Destruction level: {3} / 100%\n\n" +
-            "Press Space to continue",
-            dayIndex.ToString(), 
-            todayEarnings.ToString("0.00"), 
+            "Press Space to continue ...",
+            dayIndex.ToString(),
+            todayEarnings.ToString("0.00"),
             ((taxes - lastTaxes) * 100f).ToString("0.00"),
             (destructionPercent * 100f).ToString("0.00"));
 
-        resumeTxt.SetText(resume);
+        totalEarnigs += todayEarnings;
+        todayEarnings = 0f;
+
+        if (dayIndex == dayCount || !entity.Alive())
+             SetFinishScreen();
+        else resumeTxt.SetText(resume);
+
         ResetScene();
 
         var destructibles = GameObject.FindGameObjectsWithTag("destructible");
@@ -322,12 +362,15 @@ public class PlayerMovement : MonoBehaviour
 
     public void UnpauseTime()
     {
+        if (dayIndex == dayCount || !entity.Alive())
+        {
+            SceneManager.LoadScene(0);
+        }
+
         pausedTime = false;
         resumeTxt.enabled = false;
 
         lastTaxes = taxes;
-        totalEarnigs += todayEarnings;
-        todayEarnings = 0f;
     }
 
     private void TimeLogic(bool moving)
@@ -444,7 +487,7 @@ public class PlayerMovement : MonoBehaviour
         
         var currentColor = grading.colorFilter.value;
         float dayInSeconds = dayInMinutes * 60;
-        var targetColor = Color.Lerp(Color.white, Color.red, red) * dayTimeLight.Evaluate((timeOfDaySeconds % dayInSeconds) / dayInSeconds);
+        var targetColor = Color.Lerp(Color.white, Color.red, red) * dayTimeLight.Evaluate((timeOfDaySeconds % dayInSeconds) / dayInSeconds) * (entity.Alive() ? 1f : 0f);
         grading.colorFilter.value = Color.Lerp(currentColor, targetColor, Time.deltaTime * 10f);
     }
 

@@ -153,7 +153,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1331229073
   m_SortingLayer: 1
-  m_SortingOrder: 0
+  m_SortingOrder: -940
   m_Sprite: {fileID: 21300000, guid: 80acc0d0807be8e4a9241cf18a94685f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -420,7 +420,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1331229073
   m_SortingLayer: 1
-  m_SortingOrder: 1
+  m_SortingOrder: -923
   m_Sprite: {fileID: 21300012, guid: b62a8e74a325e4493956501c30341010, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -540,6 +540,7 @@ MonoBehaviour:
   volume: {fileID: 1342129063049777662}
   entity: {fileID: 1391775184140962675}
   coinPrefab: {fileID: 1828344097472596079, guid: 090efcff260a7854e8fddeb3db4f4a68, type: 3}
+  spawner: {fileID: 0}
   dayCount: 10
   timeSpeedUp: 10
   dayInMinutes: 2
@@ -597,6 +598,7 @@ MonoBehaviour:
   timeOfDayTxt: {fileID: 0}
   salaryTxt: {fileID: 0}
   taxesTxt: {fileID: 0}
+  resumeTxt: {fileID: 0}
   progressTime: {fileID: 0}
   townHall: {fileID: 0}
 --- !u!114 &2836362532131447326
