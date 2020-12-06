@@ -111,8 +111,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10d216f88bb979843b2c404645061d77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  colliders:
+  - {fileID: 971296573}
   health: 10
-  destroyOnDeath: 0
+  immortal: 0
+  destroyOnDeath: 1
+  coinSpawnOnDeath: 10
 --- !u!61 &971296573
 BoxCollider2D:
   m_ObjectHideFlags: 0

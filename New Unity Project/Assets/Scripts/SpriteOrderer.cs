@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[ExecuteInEditMode]
 public class SpriteOrderer : MonoBehaviour
 {
     SpriteRenderer sr;
@@ -21,6 +22,8 @@ public class SpriteOrderer : MonoBehaviour
 
     void Update()
     {
+        if (sr == null && sorter == null && mr == null) Awake();
+
         float off = bottomOffset * (sr == null ? mr.bounds.size.y : sr.bounds.size.y);
 
         if (sr != null) sr.sortingOrder = Mathf.RoundToInt((sr.bounds.min.y + off) * 100f) * -1;

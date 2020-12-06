@@ -165,7 +165,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10d216f88bb979843b2c404645061d77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  colliders: []
+  colliders:
+  - {fileID: 5239162656564423468}
   health: 10
   immortal: 0
-  destroyOnDeath: 0
+  destroyOnDeath: 1
+  coinSpawnOnDeath: 5

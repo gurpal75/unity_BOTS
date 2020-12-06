@@ -260,7 +260,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1331229073
   m_SortingLayer: 1
-  m_SortingOrder: 0
+  m_SortingOrder: -314
   m_Sprite: {fileID: 21300000, guid: 80acc0d0807be8e4a9241cf18a94685f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -302,7 +302,7 @@ GameObject:
   - component: {fileID: 7252507808475912703}
   m_Layer: 9
   m_Name: NPC
-  m_TagString: Untagged
+  m_TagString: police
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -342,7 +342,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: f011ec337a8d8384ebdde1f5f8bbd532, type: 2}
+  - {fileID: 2100000, guid: 5c24b9cc54b069747b33012f678f12b9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -362,7 +362,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1331229073
   m_SortingLayer: 1
-  m_SortingOrder: 1
+  m_SortingOrder: -303
   m_Sprite: {fileID: 21300000, guid: df894d170d5f44be293fae0ef08b055c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -440,6 +440,7 @@ MonoBehaviour:
   health: 40
   immortal: 1
   destroyOnDeath: 0
+  coinSpawnOnDeath: 0
 --- !u!114 &7252507808475912703
 MonoBehaviour:
   m_ObjectHideFlags: 0

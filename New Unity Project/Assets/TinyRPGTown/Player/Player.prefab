@@ -400,7 +400,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: f011ec337a8d8384ebdde1f5f8bbd532, type: 2}
+  - {fileID: 2100000, guid: 5c24b9cc54b069747b33012f678f12b9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -529,6 +529,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 803072d3d11d76c46a3e6c8d8176a61e, type: 3}
   - {fileID: 8300000, guid: e0cc7eca8203fe74a929380be2604d13, type: 3}
   - {fileID: 8300000, guid: 61740901bcccf6647a3c8af9db69b545, type: 3}
+  gruntClip: {fileID: 8300000, guid: ce07b61a127500f42a98bbcb1c65c037, type: 3}
   rb: {fileID: 2836362532131447323}
   animator: {fileID: 2131295903}
   audioSource: {fileID: 6899847622165140833}
@@ -537,10 +538,65 @@ MonoBehaviour:
   slashFX: {fileID: 889711355307360108}
   cmr: {fileID: 0}
   volume: {fileID: 1342129063049777662}
+  entity: {fileID: 1391775184140962675}
+  coinPrefab: {fileID: 1828344097472596079, guid: 090efcff260a7854e8fddeb3db4f4a68, type: 3}
   dayCount: 10
   timeSpeedUp: 10
   dayInMinutes: 2
+  dayTimeLight:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0.3296855
+      outSlope: 0.3296855
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.40186897
+    - serializedVersion: 3
+      time: 0.3288383
+      value: 0.36794573
+      inSlope: 2.9121575
+      outSlope: 2.9121575
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.14827774
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.5
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.21104538
+    - serializedVersion: 3
+      time: 0.6534819
+      value: 0.416211
+      inSlope: -1.995401
+      outSlope: -1.995401
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -0.3914013
+      outSlope: -0.3914013
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.47243735
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   timeOfDayTxt: {fileID: 0}
+  salaryTxt: {fileID: 0}
+  taxesTxt: {fileID: 0}
   progressTime: {fileID: 0}
   townHall: {fileID: 0}
 --- !u!114 &2836362532131447326
@@ -569,9 +625,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colliders: []
-  health: 10
-  immortal: 1
+  health: 20
+  immortal: 0
   destroyOnDeath: 0
+  coinSpawnOnDeath: 0
 --- !u!1 &4528554674103770056
 GameObject:
   m_ObjectHideFlags: 0

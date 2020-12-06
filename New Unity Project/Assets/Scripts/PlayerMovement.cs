@@ -38,6 +38,7 @@ public class PlayerMovement : MonoBehaviour
     public AudioClip[] slash;
     public AudioClip[] slash_hit;
     public AudioClip[] music;
+    public AudioClip gruntClip;
 
     [Header("Components")]
 
@@ -49,16 +50,23 @@ public class PlayerMovement : MonoBehaviour
     public SpriteRenderer slashFX;
     public CinemachineVirtualCamera cmr;
     public PostProcessVolume volume;
+    public Entity entity;
+    public GameObject coinPrefab;
+    public NPCSpawner spawner;
 
     [Header("Time")]
 
     public int dayCount = 10;
     public float timeSpeedUp = 5f;
     public float dayInMinutes = 3f;
+    public AnimationCurve dayTimeLight;
 
     [Header("UI")]
 
     public TMPro.TMP_Text timeOfDayTxt;
+    public TMPro.TMP_Text salaryTxt;
+    public TMPro.TMP_Text taxesTxt;
+    public TMPro.TMP_Text resumeTxt;
     public RectTransform progressTime;
     public Transform townHall;
 
@@ -83,9 +91,24 @@ public class PlayerMovement : MonoBehaviour
     float vandalismRate = 0f;
     float timeOfDaySeconds = 0f;
 
+    float reputation = 0f;
+
+    Vector3 spawnLocation;
+
     CinemachineBasicMultiChannelPerlin noise;
     ChromaticAberration chromatic;
     ColorGrading grading;
+
+    const float defaultTaxes = 0.40f;
+
+    float salary = 1300f;
+    float taxes = defaultTaxes;
+
+    float todayEarnings = 0f;
+    float totalEarnigs = 0f;
+
+    bool vandalized = false;
+    float lastTaxes = defaultTaxes;
 
     public float GetVandalismRate()
     {
@@ -97,8 +120,22 @@ public class PlayerMovement : MonoBehaviour
         return musicMomentum > 0;
     }
 
+    public void SpawnCoin(Vector3 p)
+    {
+        Instantiate(coinPrefab, p, Quaternion.identity);
+    }
+
+    internal void PickedUpCoin()
+    {
+        todayEarnings += Random.Range(0.1f, 1f);
+    }
+
+    int dayIndex = 0;
+    int lastDayIndex = 0;
+
     private void Awake()
     {
+        spawnLocation = transform.position;
         me = this;
 
         if (cmr != null)
@@ -116,10 +153,29 @@ public class PlayerMovement : MonoBehaviour
         musicSource.clip = music[Random.Range(0, music.Length)];
     }
 
+    bool pausedTime = false;
+
     void Update()
     {
+        if (!vandalized && IsVandalising())
+            vandalized = true;
+
+        if (pausedTime)
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+                UnpauseTime();
+
+            TimeLogic(true);
+            return;
+        }
+
+        salaryTxt.SetText("Salary: " + salary.ToString("0.00") + "$ ( +" + todayEarnings.ToString("0.00") + "$ )");
+        taxesTxt.SetText("Taxes: " + (taxes * 100f).ToString("0.00") + "%");
+
         // Get the music rithm
         float sample = GetMusicRythm();
+
+        bool alive = entity.Alive();
 
         // Handle music logic
         musicSource.volume = musicMomentum;
@@ -131,10 +187,18 @@ public class PlayerMovement : MonoBehaviour
 
         if (musicSource.volume == 0f)
             musicSource.clip = music[Random.Range(0, music.Length)];
-        musicMomentum = Mathf.MoveTowards(musicMomentum, 0f, Time.deltaTime * 0.2f);
+        musicMomentum = Mathf.MoveTowards(musicMomentum, 0f, alive ? Time.deltaTime * 0.2f : Time.deltaTime * 5f);
 
-        if (!IsVandalising() && Vector3.Distance(transform.position, townHall.position) < 10f)
+        if (alive && !IsVandalising() && Vector3.Distance(transform.position, townHall.position) < 10f)
         {
+            if (Time.time - timerLimitCoin > 2f)
+            {
+                Instantiate(coinPrefab, transform.position, Quaternion.identity);
+                timerLimitCoin = Time.time;
+
+                taxes -= 0.00001f;
+            }
+
             sign.enabled = true;
             sign.transform.localPosition = new Vector3(0, (1f + Mathf.Sin(Time.time * 5f)) * 0.1f, 0);
         }
@@ -147,7 +211,8 @@ public class PlayerMovement : MonoBehaviour
         SpawnerLogic();
 
         // SHOOT LASERS THROUGH THE EYES
-        LaserLogic(sample);
+        if (alive)
+            LaserLogic(sample);
 
         // Use it for screen effects
         VisualEffectsByMusic(sample);
@@ -159,20 +224,110 @@ public class PlayerMovement : MonoBehaviour
         CameraShake();
 
         // Day logic
-        timeOfDaySeconds += Time.deltaTime;
+        if (alive)
+        {
+            timeOfDaySeconds += Time.deltaTime;
 
-        float dayInSeconds = dayInMinutes * 60;
-        float hour = ((timeOfDaySeconds % dayInSeconds) / dayInSeconds) * 24f;
-        int hour_int = Mathf.FloorToInt(hour);
-        int min_int = Mathf.FloorToInt((hour - hour_int) * 60);
+            float dayInSeconds = dayInMinutes * 60;
+            float hour = ((timeOfDaySeconds % dayInSeconds) / dayInSeconds) * 24f;
+            int hour_int = Mathf.FloorToInt(hour);
+            int min_int = Mathf.FloorToInt((hour - hour_int) * 60);
 
-        timeOfDayTxt.SetText(string.Format("{0}h {1}",
-            hour_int.ToString("00"),
-            min_int.ToString("00")));
+            dayIndex = Mathf.FloorToInt(timeOfDaySeconds / dayInSeconds);
 
-        float fullTime = dayCount * dayInSeconds;
+            if (dayIndex != lastDayIndex)
+            {
+                lastDayIndex = dayIndex;
+                NextDayMenu();
+            }
 
-        progressTime.localScale = new Vector3(timeOfDaySeconds / fullTime, 1, 1);
+            timeOfDayTxt.SetText(string.Format("{0}h {1}",
+                hour_int.ToString("00"),
+                min_int.ToString("00")));
+
+            float fullTime = dayCount * dayInSeconds;
+
+            progressTime.localScale = new Vector3(timeOfDaySeconds / fullTime, 1, 1);
+        }
+    }
+
+    void ResetScene()
+    {
+        transform.position = spawnLocation;
+        entity.health = 20f;
+
+        if (vandalized)
+        {
+            reputation += 0.2f;
+            if (reputation > 1f) reputation = 1f;
+        }
+        else
+        {
+            reputation -= 0.1f;
+            if (reputation < 0) reputation = 0;
+        }
+
+        vandalized = false;
+    }
+
+    void NextDayMenu()
+    {
+        pausedTime = true;
+        resumeTxt.enabled = true;
+        Time.timeScale = 0f;
+
+        float killingRate = (Entity.Destroyed / (float)Entity.Spawned);
+
+        float destructionRate = 0f;
+        foreach(var e in Entity.entities)
+            destructionRate += e.GetDestructionLevel();
+        destructionRate /= Entity.entities.Count;
+
+        Entity.Spawned = 0;
+        Entity.Destroyed = 0;
+
+        float destructionPercent = killingRate * 0.3f + destructionRate * 0.7f;
+        float taxesIncrease = (todayEarnings * destructionPercent) * 0.1f;
+
+        taxes += taxesIncrease;
+
+        string incdec = taxes > 0 ? "increased" : "decreased";
+        string resume = string.Format(
+            "<b>Day {0}</b>\n\n"+
+            "You earned {1}$ and " + incdec + " the taxes amount by {2}% today.\n" + 
+            "Destruction level: {3} / 100%\n\n" +
+            "Press Space to continue",
+            dayIndex.ToString(), 
+            todayEarnings.ToString("0.00"), 
+            ((taxes - lastTaxes) * 100f).ToString("0.00"),
+            (destructionPercent * 100f).ToString("0.00"));
+
+        resumeTxt.SetText(resume);
+        ResetScene();
+
+        var destructibles = GameObject.FindGameObjectsWithTag("destructible");
+        var police = GameObject.FindGameObjectsWithTag("police");
+
+        spawner.Respawn();
+
+        foreach (var p in police)
+            Destroy(p);
+
+        foreach (var d in destructibles)
+        {
+            Destructible2D.D2dDestructible des = d.GetComponent<Destructible2D.D2dDestructible>();
+            des.ResetAlpha();
+        }
+    }
+
+    public void UnpauseTime()
+    {
+        pausedTime = false;
+        resumeTxt.enabled = false;
+
+        lastTaxes = taxes;
+        totalEarnigs += todayEarnings;
+        todayEarnings = 0f;
     }
 
     private void TimeLogic(bool moving)
@@ -199,7 +354,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (musicMomentum > 0)
         {
-            if (Time.time - spawnerTime > 0.5f && NPCBrain.NPCCount < 10)
+            if (Time.time - spawnerTime > 0.5f && NPCBrain.NPCCount < Mathf.Lerp(10, 80, reputation))
             {
                 int count = Mathf.FloorToInt(musicMomentum * 0.6f);
 
@@ -276,16 +431,21 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    private float red = 0f;
+
     private void VisualEffectsByMusic(float sample)
     {
         if (chromatic != null)
         {
             chromatic.intensity.value = sample;
 
-            var currentColor = grading.colorFilter.value;
-            var targetColor = Color.Lerp(Color.white, Color.red, (sample + (musicMomentum / 10f)) * 0.5f);
-            grading.colorFilter.value = Color.Lerp(currentColor, targetColor, Time.deltaTime * 10f);
+            red = Mathf.Lerp(0, 1f, (sample + (musicMomentum / 10f)) * 0.5f);
         }
+        
+        var currentColor = grading.colorFilter.value;
+        float dayInSeconds = dayInMinutes * 60;
+        var targetColor = Color.Lerp(Color.white, Color.red, red) * dayTimeLight.Evaluate((timeOfDaySeconds % dayInSeconds) / dayInSeconds);
+        grading.colorFilter.value = Color.Lerp(currentColor, targetColor, Time.deltaTime * 10f);
     }
 
     private float GetMusicRythm()
@@ -309,6 +469,15 @@ public class PlayerMovement : MonoBehaviour
 
         TimeLogic(delta != Vector2.zero);
 
+        bool alive = entity.Alive();
+
+        animator.SetBool("Dead", !alive);
+        if (!alive)
+        {
+            delta = Vector2.zero;
+            return;
+        }
+
         // Keep track of the facing direction
         if (delta != Vector2.zero)
             lastDirection = delta;
@@ -328,7 +497,7 @@ public class PlayerMovement : MonoBehaviour
         {
             if (shakeTimer > 0)
             {
-                noise.m_AmplitudeGain = Mathf.Lerp(noise.m_AmplitudeGain, Mathf.Min(2f, musicMomentum * 5f), Time.deltaTime * 10f);
+                noise.m_AmplitudeGain = Mathf.Lerp(noise.m_AmplitudeGain, Mathf.Min(8f, musicMomentum * 5f), Time.deltaTime * 10f);
                 shakeTimer -= Time.deltaTime;
             }
             else
@@ -338,9 +507,14 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    void ShakeCamera(float time)
+    public void ShakeCamera(float time)
     {
         shakeTimer = time;
+    }
+
+    public void Grunt()
+    {
+        audioSource.PlayOneShot(gruntClip, 1f);
     }
 
     public void AttackCollider(Collider2D c, float dmg)
@@ -355,6 +529,12 @@ public class PlayerMovement : MonoBehaviour
             if (entity == null) return;
         }
 
+        if (!entity.immortal)
+        {
+            Instantiate(coinPrefab, c.bounds.center, Quaternion.identity);
+            OnHitSomething();
+        }
+
         Vector2 direction = (entity.transform.position - transform.position).normalized;
 
         // Make sure we are facing it before we attack it
@@ -366,6 +546,8 @@ public class PlayerMovement : MonoBehaviour
             entity.TakeDamage(dmg, direction * 50f);
         }
     }
+
+    float timerLimitCoin = 0;
 
     // This method is called by the animation
     void Attack()
@@ -398,6 +580,12 @@ public class PlayerMovement : MonoBehaviour
                 var collisionPoint = collisions[i].bounds.ClosestPoint(transform.position);
                 Instantiate(redExplosion, collisionPoint, Quaternion.identity);
                 entity.TakeDamage(playerDmg + (musicMomentum / 10f) * 3f, direction * 50f);
+
+                if (!entity.immortal && Time.time - timerLimitCoin > 0.2f)
+                {
+                    Instantiate(coinPrefab, collisionPoint, Quaternion.identity);
+                    timerLimitCoin = Time.time;
+                }
                 hitSomething = true;
             }
         }

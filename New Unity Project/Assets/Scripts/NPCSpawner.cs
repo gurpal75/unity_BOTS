@@ -11,6 +11,11 @@ public class NPCSpawner : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Respawn();
+    }
+
+    public void Respawn()
+    {
         for (int i = 0; i < count; ++i)
         {
             Instantiate(prefab, transform.position + new Vector3(Random.Range(-8f, 8f), Random.Range(-1f, 2f), 0), Quaternion.identity);
